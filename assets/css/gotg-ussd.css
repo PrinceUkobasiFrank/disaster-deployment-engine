@@ -1,0 +1,275 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --phone-bg: #000000;
+    --screen-bg: #f8fafc;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --accent-green: #16a34a;
+    --btn-gray: #334155;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    max-width: 900px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Phone Shell */
+.phone-container {
+    background: var(--phone-bg);
+    width: 320px;
+    height: 600px;
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 4px #334155;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.phone-speaker {
+    width: 60px;
+    height: 4px;
+    background: #334155;
+    border-radius: 2px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.phone-screen {
+    background: var(--screen-bg);
+    flex: 1;
+    border-radius: 30px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 16px;
+    color: var(--text-dark);
+}
+
+/* Top Status Bar Simulation */
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+/* Dialer Screen UI */
+.dialer-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    padding-bottom: 10px;
+}
+
+.dialer-display {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30px;
+    height: 40px;
+    color: #0f172a;
+    letter-spacing: 1px;
+}
+
+.dialer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 10px;
+}
+
+.dial-btn {
+    background: #e2e8f0;
+    color: #0f172a;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.dial-btn:active {
+    background: #cbd5e1;
+}
+
+.dial-btn.call {
+    background: var(--accent-green);
+    color: white;
+    grid-column: 2;
+}
+
+.dial-btn.backspace {
+    background: #fecaca;
+    color: #dc2626;
+}
+.dial-btn.backspace:active {
+    background: #fca5a5;
+}
+.dial-btn.call:active {
+    background: #15803d;
+}
+
+/* USSD Dialog Box Styling */
+.ussd-dialog {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: none;
+    flex-direction: column;
+}
+
+.ussd-content {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    color: #0f172a;
+    margin-bottom: 16px;
+}
+
+.ussd-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 16px;
+    color: var(--text-dark);
+}
+
+.ussd-input:focus {
+    border-color: var(--accent-green);
+}
+
+.ussd-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.ussd-btn {
+    background: none;
+    border: none;
+    color: var(--accent-green);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+.ussd-btn:hover {
+    background: #f1f5f9;
+}
+
+.ussd-btn.cancel {
+    color: var(--text-muted);
+}
+
+/* Sidebar Metadata Panel */
+.meta-panel {
+    flex: 1;
+    max-width: 450px;
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.meta-panel h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.meta-panel p {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.flow-log {
+    background: #0f172a;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #34d399;
+    height: 150px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+}
+
+.reset-container {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: var(--btn-gray);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    background: #475569;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .meta-panel {
+        width: 100%;
+        max-width: 320px;
+    }
+}
