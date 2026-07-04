@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift of the Givers - USSD Simulation</title>
+    <link rel="stylesheet" href="assets/css/gotg-ussd.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Simulated Mobile Device -->
+    <div class="phone-container">
+        <div class="phone-speaker"></div>
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span>GotG Net</span>
+                <span>12:00 PM</span>
+            </div>
+
+            <!-- Dialer Interface Layout -->
+            <div class="dialer-screen" id="dialerScreen">
+                <div class="dialer-display" id="dialerNumber"></div>
+                <div class="dialer-grid">
+                    <button class="dial-btn" onclick="pressKey('1')">1</button>
+                    <button class="dial-btn" onclick="pressKey('2')">2</button>
+                    <button class="dial-btn" onclick="pressKey('3')">3</button>
+                    <button class="dial-btn" onclick="pressKey('4')">4</button>
+                    <button class="dial-btn" onclick="pressKey('5')">5</button>
+                    <button class="dial-btn" onclick="pressKey('6')">6</button>
+                    <button class="dial-btn" onclick="pressKey('7')">7</button>
+                    <button class="dial-btn" onclick="pressKey('8')">8</button>
+                    <button class="dial-btn" onclick="pressKey('9')">9</button>
+                    <button class="dial-btn" onclick="pressKey('*')">*</button>
+                    <button class="dial-btn" onclick="pressKey('0')">0</button>
+                    <button class="dial-btn" onclick="pressKey('#')">#</button>
+                    <button class="dial-btn call" onclick="triggerUSSD()">➔</button>
+                    <button class="dial-btn backspace" onclick="backspaceKey()" id="backspaceBtn">⌫</button>
+                </div>
+            </div>
+
+            <!-- Dynamic USSD Interface Box -->
+            <div class="ussd-dialog" id="ussdBox">
+                <div class="ussd-content" id="ussdText">Loading...</div>
+                <input type="text" id="userInput" class="ussd-input" autocomplete="off">
+                <div class="ussd-actions">
+                    <button class="ussd-btn cancel" id="cancelBtn" onclick="exitUSSD()">Cancel</button>
+                    <button class="ussd-btn" id="sendBtn" onclick="processInput()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Reader Panel -->
+    <div class="meta-panel">
+        <h2>Interactive Concept Demo</h2>
+        <p>This simulation mirrors how a field coordinator or disaster victim interacts with <strong>Gift of the Givers</strong> completely offline when networks are down.</p>
+
+        <div style="margin-bottom: 12px; font-size: 13px; font-weight: 600; color: #cbd5e1;">Live Session Log:</div>
+        <div class="flow-log" id="logBox">> Device ready. Enter *3664# to start.</div>
+
+        <div class="reset-container">
+            <button class="action-btn" onclick="resetSession()">Reset Device</button>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/gotg-ussd.js"></script>
+</body>
+</html>

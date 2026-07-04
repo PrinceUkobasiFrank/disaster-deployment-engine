@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GotG — Get Help</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="assets/css/gotg-user.css">
+</head>
+<body>
+
+<!-- ══ ROLE SELECTOR ══ -->
+<div class="role-screen" id="roleScreen">
+    <div class="role-logo">
+        <img src="logo.png" alt="GotG" onerror="this.style.display='none';this.parentElement.innerHTML='<i class='fa-solid fa-hand-holding-heart'></i>'">
+    </div>
+    <div class="role-heading">Gift of the Givers</div>
+    <div class="role-sub">Who are you today? We'll show you only what you need.</div>
+    <div class="role-label">I am a...</div>
+    <div class="role-cards">
+        <div class="role-card" onclick="selectRole('beneficiary')">
+            <div class="role-card-icon" style="background:rgba(220,38,38,0.15);color:#dc2626"><i class="fa-solid fa-person-shelter"></i></div>
+            <div class="role-card-text">
+                <div class="role-card-title">Person Needing Help</div>
+                <div class="role-card-desc">I need food, water, shelter or medical help</div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+        <div class="role-card" onclick="selectRole('volunteer')">
+            <div class="role-card-icon" style="background:rgba(37,99,235,0.15);color:#2563eb"><i class="fa-solid fa-people-carry-box"></i></div>
+            <div class="role-card-text">
+                <div class="role-card-title">Volunteer</div>
+                <div class="role-card-desc">I'm here to help with field tasks and distribution</div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+        <div class="role-card" onclick="selectRole('donor')">
+            <div class="role-card-icon" style="background:rgba(5,150,105,0.15);color:#059669"><i class="fa-solid fa-hand-holding-heart"></i></div>
+            <div class="role-card-text">
+                <div class="role-card-title">Donor</div>
+                <div class="role-card-desc">I want to fund a specific relief project</div>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </div>
+    </div>
+</div>
+
+<div class="app" id="app">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header-glass">
+        <div class="header-top">
+            <div class="brand-pill">
+                <div class="logo-wrap">
+                    <img src="logo.png" alt="GotG" onerror="this.style.display='none';this.parentElement.innerHTML='<i class='fa-solid fa-hand-holding-heart'></i>'">
+                </div>
+                <div class="brand-text">
+                    <div class="org">Gift of the Givers</div>
+                    <div class="role-tag" id="roleTag">Field App</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="icon-btn alert" onclick="showToast('3 updates from Command Centre')" title="Alerts"><i class="fa-solid fa-bell"></i></div>
+                <div class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme"><i class="fa-solid fa-moon"></i></div>
+                <div class="icon-btn" onclick="goBack()" title="Switch role" style="font-size:11px;font-weight:700;color:var(--accent-green)">↩</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Alert Banner (fed from admin) -->
+    <div class="command-alert" id="cmdAlert">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <div class="alert-text-block">
+            Command Centre Update — Kuruman flood response active
+            <span>Last push from Command: just now · Tap to see latest updates</span>
+        </div>
+    </div>
+
+    <!-- ══ CONTENT ══ -->
+    <div class="content">
+
+        <!-- ─── TAB: HOME (adapts by role) ─── -->
+        <div class="tab-view active" id="tab-home">
+
+            <!-- BENEFICIARY HOME -->
+            <div id="view-beneficiary">
+                <div class="stats-strip">
+                    <div class="stat-card"><div class="stat-number green">12</div><div class="stat-label">Shelters Open</div></div>
+                    <div class="stat-card"><div class="stat-number orange">47</div><div class="stat-label">Volunteers Active</div></div>
+                    <div class="stat-card"><div class="stat-number">3</div><div class="stat-label">Aid Hubs Near You</div></div>
+                </div>
+                <div class="section-header"><div class="section-title">What do you need?</div></div>
+                <div class="quick-actions">
+                    <div class="action-tile" onclick="switchTab('tab-report')">
+                        <div class="action-icon red"><i class="fa-solid fa-hand-holding-medical"></i></div>
+                        <div class="action-label">Medical Help</div>
+                    </div>
+                    <div class="action-tile" onclick="switchTab('tab-report')">
+                        <div class="action-icon blue"><i class="fa-solid fa-droplet"></i></div>
+                        <div class="action-label">Water & Food</div>
+                    </div>
+                    <div class="action-tile" onclick="switchTab('tab-map')">
+                        <div class="action-icon green"><i class="fa-solid fa-house-chimney-medical"></i></div>
+                        <div class="action-label">Find Shelter</div>
+                    </div>
+                    <div class="action-tile" onclick="openUSSDModal()">
+                        <div class="action-icon orange"><i class="fa-solid fa-phone"></i></div>
+                        <div class="action-label">No Data? Dial</div>
+                    </div>
+                </div>
+
+                <div class="section-header"><div class="section-title">Latest from Command</div></div>
+                <div id="commandFeed">
+                    <div class="update-card urgent">
+                        <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                        <div class="update-tag urgent"><i class="fa-solid fa-circle-exclamation"></i> Urgent</div>
+                        <div class="update-title">R31 Road Blocked — Use Alternative Routes</div>
+                        <div class="update-body">The R31 bridge near Kuruman is underwater. Do not attempt to cross. Alternative route via Gamagara has been cleared by our teams.</div>
+                        <div class="update-footer">
+                            <span class="update-time"><i class="fa-regular fa-clock"></i> 8 min ago</span>
+                            <button class="update-action" onclick="switchTab('tab-map')">See on Map</button>
+                        </div>
+                    </div>
+                    <div class="update-card warning">
+                        <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                        <div class="update-tag warning"><i class="fa-solid fa-triangle-exclamation"></i> Important</div>
+                        <div class="update-title">Water Distribution — Kuruman Community Hall</div>
+                        <div class="update-body">Clean water and food parcels are available at Kuruman Community Hall from 10am–4pm today. Bring your ID if possible.</div>
+                        <div class="update-footer">
+                            <span class="update-time"><i class="fa-regular fa-clock"></i> 22 min ago</span>
+                            <button class="update-action" onclick="switchTab('tab-map')">Get Directions</button>
+                        </div>
+                    </div>
+                    <div class="update-card info">
+                        <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                        <div class="update-tag info"><i class="fa-solid fa-circle-check"></i> Good News</div>
+                        <div class="update-title">Mobile Medical Clinic Now at Butterworth</div>
+                        <div class="update-body">Our medical team is on-site at Butterworth Sports Complex. No appointment needed — walk in for treatment, medicines and baby care.</div>
+                        <div class="update-footer">
+                            <span class="update-time"><i class="fa-regular fa-clock"></i> 1 hr ago</span>
+                            <button class="update-action" onclick="showToast('Butterworth Sports Complex, Eastern Cape')">Address</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VOLUNTEER HOME -->
+            <div id="view-volunteer" style="display:none">
+                <div class="stats-strip">
+                    <div class="stat-card"><div class="stat-number orange">14</div><div class="stat-label">Open Tasks</div></div>
+                    <div class="stat-card"><div class="stat-number green">47</div><div class="stat-label">Volunteers</div></div>
+                    <div class="stat-card"><div class="stat-number red">3</div><div class="stat-label">Urgent</div></div>
+                </div>
+                <div class="section-header"><div class="section-title">Quick Actions</div></div>
+                <div class="quick-actions">
+                    <div class="action-tile" onclick="switchTab('tab-tasks')">
+                        <div class="action-icon blue"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="action-label">My Tasks</div>
+                    </div>
+                    <div class="action-tile" onclick="switchTab('tab-report')">
+                        <div class="action-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="action-label">Report Hazard</div>
+                    </div>
+                    <div class="action-tile" onclick="switchTab('tab-map')">
+                        <div class="action-icon green"><i class="fa-solid fa-map-location-dot"></i></div>
+                        <div class="action-label">Field Map</div>
+                    </div>
+                    <div class="action-tile" onclick="showToast('Syncing with mesh...')">
+                        <div class="action-icon orange"><i class="fa-solid fa-rotate"></i></div>
+                        <div class="action-label">Sync Mesh</div>
+                    </div>
+                </div>
+                <div class="section-header"><div class="section-title">Latest from Command</div><div class="section-action" onclick="switchTab('tab-tasks')">All Tasks</div></div>
+                <div id="commandFeedVol">
+                    <div class="update-card urgent">
+                        <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                        <div class="update-tag urgent"><i class="fa-solid fa-circle-exclamation"></i> Urgent</div>
+                        <div class="update-title">3 Solar Pumps Needed — Kuruman Ward 4</div>
+                        <div class="update-body">Command has dispatched 3 solar water pumps. Volunteers needed to assist with installation at Ward 4 settlement. Vehicles available at base.</div>
+                        <div class="update-footer">
+                            <span class="update-time"><i class="fa-regular fa-clock"></i> 5 min ago</span>
+                            <button class="update-action" onclick="switchTab('tab-tasks')">Accept Task</button>
+                        </div>
+                    </div>
+                    <div class="update-card warning">
+                        <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                        <div class="update-tag warning">Route Update</div>
+                        <div class="update-title">Avoid R31 — Bridge Submerged</div>
+                        <div class="update-body">Command has flagged R31 bridge as impassable. All supply runs rerouted via Gamagara road. Update your route before departure.</div>
+                        <div class="update-footer">
+                            <span class="update-time"><i class="fa-regular fa-clock"></i> 8 min ago</span>
+                            <button class="update-action" onclick="switchTab('tab-map')">See Route</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DONOR HOME -->
+            <div id="view-donor" style="display:none">
+                <div class="section-header"><div class="section-title">Where Your Money Goes</div></div>
+                <div class="update-card info" style="margin-bottom:16px">
+                    <div class="cmd-badge"><i class="fa-solid fa-satellite-dish"></i> Command Centre</div>
+                    <div class="update-tag info"><i class="fa-solid fa-satellite-dish"></i> Live from the field</div>
+                    <div class="update-title">3 Projects Need Funding Right Now</div>
+                    <div class="update-body">Command has verified these are the most urgent needs on the ground today. Every rand is tracked and confirmed when deployed.</div>
+                    <div class="update-footer"><span class="update-time"><i class="fa-regular fa-clock"></i> Updated just now</span></div>
+                </div>
+                <div class="section-header"><div class="section-title">Active Projects</div></div>
+                <div class="donor-card">
+                    <div class="donor-card-header">
+                        <div><div class="donor-project-name">Hospital Generator Fuel — Kuruman</div><div class="donor-location"><i class="fa-solid fa-location-dot"></i> John Taolo Gaetsewe District</div></div>
+                        <div><div class="donor-amount">R12,400</div><div class="donor-amount-label">of R18,000</div></div>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>Keeps hospital running</span><span>69%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width:69%"></div></div>
+                    </div>
+                    <div class="donor-footer">
+                        <button class="donor-btn" onclick="showToast('Opening details...')">Details</button>
+                        <button class="donor-btn primary" onclick="openDonateModal('Hospital Generator Fuel')">Fund This</button>
+                    </div>
+                </div>
+                <div class="donor-card">
+                    <div class="donor-card-header">
+                        <div><div class="donor-project-name">Solar Water Pump — Karos Settlement</div><div class="donor-location"><i class="fa-solid fa-location-dot"></i> Northern Cape</div></div>
+                        <div><div class="donor-amount">R8,900</div><div class="donor-amount-label">of R22,000</div></div>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>Clean water for 800 people</span><span>40%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width:40%"></div></div>
+                    </div>
+                    <div class="donor-footer">
+                        <button class="donor-btn" onclick="showToast('Opening details...')">Details</button>
+                        <button class="donor-btn primary" onclick="openDonateModal('Solar Water Pump')">Fund This</button>
+                    </div>
+                </div>
+                <div class="donor-card">
+                    <div class="donor-card-header">
+                        <div><div class="donor-project-name">Baby Formula — Diakonia Shelter, Durban</div><div class="donor-location"><i class="fa-solid fa-location-dot"></i> Durban CBD</div></div>
+                        <div><div class="donor-amount">R3,200</div><div class="donor-amount-label">of R6,000</div></div>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-label"><span>Infant nutrition at shelter</span><span>53%</span></div>
+                        <div class="progress-track"><div class="progress-fill" style="width:53%"></div></div>
+                    </div>
+                    <div class="donor-footer">
+                        <button class="donor-btn" onclick="showToast('Opening details...')">Details</button>
+                        <button class="donor-btn primary" onclick="openDonateModal('Baby Formula')">Fund This</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── TAB: MAP ─── -->
+        <div class="tab-view" id="tab-map">
+            <div class="section-header" style="margin-top:16px">
+                <div class="section-title">Aid Locations Near You</div>
+                <div class="section-action" onclick="showToast('Map refreshed from Command')">Refresh</div>
+            </div>
+            <div id="userMap"></div>
+            <div class="map-legend-user">
+                <div class="map-legend-item"><div class="legend-dot" style="background:#10b981;box-shadow:0 0 6px #10b981"></div> Open Shelter</div>
+                <div class="map-legend-item"><div class="legend-dot" style="background:#3b82f6;box-shadow:0 0 6px #3b82f6"></div> Aid / Water Hub</div>
+                <div class="map-legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Medical Clinic</div>
+                <div class="map-legend-item"><div class="legend-dot" style="background:#ef4444"></div> Road Blocked</div>
+            </div>
+            <div class="section-header"><div class="section-title">Shelters &amp; Hubs</div></div>
+            <div class="shelter-card" onclick="showToast('Kuruman Community Hall — Open now')">
+                <div class="shelter-icon" style="background:var(--accent-green-dim);color:var(--accent-green)"><i class="fa-solid fa-house-chimney-medical"></i></div>
+                <div class="shelter-body">
+                    <div class="shelter-name">Kuruman Community Hall</div>
+                    <div class="shelter-address"><i class="fa-solid fa-location-dot"></i> Church St, Kuruman · 1.2 km</div>
+                    <div class="shelter-caps">
+                        <span class="shelter-pill" style="background:var(--accent-green-dim);color:var(--accent-green)">Water</span>
+                        <span class="shelter-pill" style="background:var(--accent-blue-dim);color:var(--accent-blue)">Food</span>
+                        <span class="shelter-pill" style="background:var(--accent-orange-dim);color:var(--accent-orange)">Medical</span>
+                    </div>
+                </div>
+                <div class="shelter-status-dot dot-green"></div>
+            </div>
+            <div class="shelter-card" onclick="showToast('Butterworth Sports Complex — Medical clinic active')">
+                <div class="shelter-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue)"><i class="fa-solid fa-kit-medical"></i></div>
+                <div class="shelter-body">
+                    <div class="shelter-name">Butterworth Sports Complex</div>
+                    <div class="shelter-address"><i class="fa-solid fa-location-dot"></i> Butterworth, Eastern Cape · 4.8 km</div>
+                    <div class="shelter-caps">
+                        <span class="shelter-pill" style="background:var(--accent-blue-dim);color:var(--accent-blue)">Medical</span>
+                        <span class="shelter-pill" style="background:var(--accent-green-dim);color:var(--accent-green)">Shelter</span>
+                    </div>
+                </div>
+                <div class="shelter-status-dot dot-green"></div>
+            </div>
+            <div class="shelter-card" onclick="showToast('Diakonia Centre — At capacity, security present')">
+                <div class="shelter-icon" style="background:var(--accent-orange-dim);color:var(--accent-orange)"><i class="fa-solid fa-people-roof"></i></div>
+                <div class="shelter-body">
+                    <div class="shelter-name">Diakonia Centre</div>
+                    <div class="shelter-address"><i class="fa-solid fa-location-dot"></i> Durban CBD · 12 km</div>
+                    <div class="shelter-caps">
+                        <span class="shelter-pill" style="background:var(--accent-orange-dim);color:var(--accent-orange)">At Capacity</span>
+                        <span class="shelter-pill" style="background:var(--accent-blue-dim);color:var(--accent-blue)">Baby Care</span>
+                    </div>
+                </div>
+                <div class="shelter-status-dot dot-orange"></div>
+            </div>
+        </div>
+
+        <!-- ─── TAB: TASKS (volunteer only) ─── -->
+        <div class="tab-view" id="tab-tasks">
+            <div class="section-header" style="margin-top:16px">
+                <div class="section-title">Your Tasks</div>
+                <div class="section-action" onclick="showToast('Synced with Command mesh ✓')"><i class="fa-solid fa-rotate"></i> Sync</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-md);background:var(--accent-orange-dim);border:1px solid rgba(234,88,12,0.2);margin-bottom:14px;font-size:12px;color:var(--accent-orange);font-weight:600;">
+                <i class="fa-solid fa-wifi"></i> Offline Mode — synced 2 min ago via peer network
+            </div>
+            <div class="section-header"><div class="section-title">My Credentials</div></div>
+            <div class="credential-card">
+                <div class="cred-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue)"><i class="fa-solid fa-certificate"></i></div>
+                <div class="cred-body"><div class="cred-name">ICS First Responder</div><div class="cred-issuer">FEMA Training Division</div></div>
+                <div class="cred-status cred-verified">Active</div>
+            </div>
+            <div class="credential-card">
+                <div class="cred-icon" style="background:rgba(139,92,246,0.1);color:#7c3aed"><i class="fa-solid fa-brain"></i></div>
+                <div class="cred-body"><div class="cred-name">Crisis Intervention</div><div class="cred-issuer">LivingWorks ASIST</div></div>
+                <div class="cred-status cred-verified">Active</div>
+            </div>
+            <div class="credential-card">
+                <div class="cred-icon" style="background:var(--accent-orange-dim);color:var(--accent-orange)"><i class="fa-solid fa-tree"></i></div>
+                <div class="cred-body"><div class="cred-name">Chainsaw Safety</div><div class="cred-issuer">Team Rubicon Ops</div></div>
+                <div class="cred-status cred-pending">Pending</div>
+            </div>
+            <div class="section-header"><div class="section-title">Assigned to You</div><div class="section-action">14 open</div></div>
+            <div class="task-card" onclick="toggleTask(this)">
+                <div class="task-checkbox"><i class="fa-solid fa-check" style="font-size:11px;display:none"></i></div>
+                <div class="task-body">
+                    <div class="task-title">Help install 3 solar water pumps — Kuruman Ward 4</div>
+                    <div class="task-meta"><span class="task-tag urgent">Urgent</span><span class="task-tag logistics">Logistics</span><span><i class="fa-regular fa-clock"></i> Due 14:00</span></div>
+                </div>
+            </div>
+            <div class="task-card" onclick="toggleTask(this)">
+                <div class="task-checkbox"><i class="fa-solid fa-check" style="font-size:11px;display:none"></i></div>
+                <div class="task-body">
+                    <div class="task-title">Hand out 200 blankets at Butterworth shelter</div>
+                    <div class="task-meta"><span class="task-tag urgent">Urgent</span><span class="task-tag field">Field</span><span><i class="fa-solid fa-location-dot"></i> Butterworth</span></div>
+                </div>
+            </div>
+            <div class="task-card" onclick="toggleTask(this)">
+                <div class="task-checkbox"><i class="fa-solid fa-check" style="font-size:11px;display:none"></i></div>
+                <div class="task-body">
+                    <div class="task-title">Set up medical trailer at N2 landslide area</div>
+                    <div class="task-meta"><span class="task-tag urgent">Urgent</span><span class="task-tag medical">Medical</span></div>
+                </div>
+            </div>
+            <div class="task-card" onclick="toggleTask(this)">
+                <div class="task-checkbox checked"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
+                <div class="task-body">
+                    <div class="task-title completed">Set up communication relay at Kuruman base</div>
+                    <div class="task-meta"><span class="task-tag field">Field</span><span style="color:var(--accent-green);font-weight:700"><i class="fa-solid fa-check-circle"></i> Done 09:41</span></div>
+                </div>
+            </div>
+            <div class="task-card" onclick="toggleTask(this)">
+                <div class="task-checkbox"><i class="fa-solid fa-check" style="font-size:11px;display:none"></i></div>
+                <div class="task-body">
+                    <div class="task-title">Refuel hospital generator — 400L diesel needed</div>
+                    <div class="task-meta"><span class="task-tag logistics">Logistics</span><span><i class="fa-regular fa-clock"></i> Due 15:30</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── TAB: REPORT ─── -->
+        <div class="tab-view" id="tab-report">
+            <div class="section-header" style="margin-top:16px"><div class="section-title">Get Help or Report a Problem</div></div>
+            <div class="ussd-card">
+                <div class="ussd-title">No data or signal?</div>
+                <div class="ussd-code">*3664#</div>
+                <div class="ussd-desc">Dial this on any basic phone to ask for help — no internet needed, works on all networks.</div>
+                <div class="ussd-btn" onclick="openUSSDModal()"><i class="fa-solid fa-phone"></i> Dial *3664#</div>
+            </div>
+            <div class="form-card">
+                <div class="form-card-title"><i class="fa-solid fa-hand-holding-medical"></i> Ask for Help</div>
+                <div class="form-row">
+                    <label class="form-label">What do you need?</label>
+                    <select class="form-select" id="aidType">
+                        <option value="">Choose what you need</option>
+                        <option>Food or Water</option>
+                        <option>Medical Help</option>
+                        <option>Shelter or Somewhere Safe to Stay</option>
+                        <option>Baby Formula or Child Care</option>
+                        <option>Medicines or First Aid</option>
+                        <option>Someone is Missing</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Where are you?</label>
+                    <input class="form-input" id="location" type="text" placeholder="Street name, area or nearby landmark">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">How many people need help?</label>
+                    <input class="form-input" id="headcount" type="number" placeholder="Number of people">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Tell us more</label>
+                    <textarea class="form-textarea" id="desc" placeholder="Describe what happened and your situation..."></textarea>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Your phone number</label>
+                    <input class="form-input" id="phone" type="tel" placeholder="+27 ___ ___ ____">
+                </div>
+                <button class="form-submit" onclick="submitReport()"><i class="fa-solid fa-paper-plane"></i> &nbsp;Send Request</button>
+            </div>
+            <div class="form-card">
+                <div class="form-card-title"><i class="fa-solid fa-triangle-exclamation"></i> Report a Blocked or Dangerous Road</div>
+                <div class="form-row">
+                    <label class="form-label">What's wrong?</label>
+                    <select class="form-select">
+                        <option value="">Select the problem</option>
+                        <option>Road is flooded / bridge is underwater</option>
+                        <option>Road has collapsed or slid away</option>
+                        <option>Fallen electricity lines across road</option>
+                        <option>Road blocked by debris or vehicles</option>
+                        <option>Burning vehicles or dangerous protest</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Which road or area?</label>
+                    <input class="form-input" type="text" placeholder="e.g. R31 near Kuruman bridge">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Can vehicles still pass?</label>
+                    <select class="form-select">
+                        <option>No — completely blocked</option>
+                        <option>Only 4x4 vehicles can pass</option>
+                        <option>Passable but dangerous — use caution</option>
+                    </select>
+                </div>
+                <button class="form-submit" style="background:var(--accent-orange);box-shadow:0 4px 14px rgba(234,88,12,0.3);" onclick="showToast('Road hazard reported to Command Centre ✓')">
+                    <i class="fa-solid fa-broadcast-tower"></i> &nbsp;Report to Command
+                </button>
+            </div>
+        </div>
+
+        <!-- ─── TAB: PROFILE ─── -->
+        <div class="tab-view" id="tab-profile">
+            <div class="section-header" style="margin-top:16px"><div class="section-title">Your Profile</div></div>
+            <div class="form-card" style="text-align:center;padding:24px;">
+                <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--accent-green),#047857);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:26px;color:white;"><i class="fa-solid fa-user"></i></div>
+                <div style="font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:4px;" id="profileRoleLabel">Welcome</div>
+                <div style="font-size:12px;color:var(--text-muted);">GotG App · Disaster Response</div>
+            </div>
+            <div class="form-card" style="padding:0;">
+                <div onclick="toggleTheme()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border-subtle);">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="action-icon blue" style="width:36px;height:36px;border-radius:8px;font-size:14px"><i class="fa-solid fa-moon"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Dark Mode</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);font-size:12px"></i>
+                </div>
+                <div onclick="showToast('Mesh synced ✓')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border-subtle);">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="action-icon green" style="width:36px;height:36px;border-radius:8px;font-size:14px"><i class="fa-solid fa-rotate"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Sync with Command</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);font-size:12px"></i>
+                </div>
+                <div onclick="goBack()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="action-icon red" style="width:36px;height:36px;border-radius:8px;font-size:14px"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+                        <div style="font-size:13px;font-weight:600;color:var(--accent-red)">Switch Role</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);font-size:12px"></i>
+                </div>
+            </div>
+            <div style="text-align:center;padding:24px 0 8px;font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;">A PR3NC2 Initiative · DDE v1.0</div>
+        </div>
+
+    </div><!-- /content -->
+
+    <!-- ══ BOTTOM NAV ══ -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('tab-home')" id="nav-home"><i class="fa-solid fa-house"></i><span>Home</span></div>
+        <div class="nav-item" onclick="switchTab('tab-map')" id="nav-map"><i class="fa-solid fa-map-location-dot"></i><span>Map</span></div>
+        <div class="nav-item" onclick="switchTab('tab-tasks')" id="nav-tasks" style="display:none"><i class="fa-solid fa-list-check"></i><span>Tasks</span><div class="nav-badge">14</div></div>
+        <div class="nav-item" onclick="switchTab('tab-report')" id="nav-report"><i class="fa-solid fa-circle-exclamation"></i><span>Get Help</span></div>
+        <div class="nav-item" onclick="switchTab('tab-profile')" id="nav-profile"><i class="fa-solid fa-user"></i><span>Profile</span></div>
+    </div>
+
+</div><!-- /app -->
+
+<!-- ══ DONATE MODAL ══ -->
+<div class="modal-overlay" id="donateModal" onclick="if(event.target===this)closeDonateModal()">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="modalProjectName">Fund This Project</div>
+        <div class="modal-sub">Your donation goes directly to this item on the ground. You'll get a notification when it's deployed.</div>
+        <div class="form-row"><label class="form-label">Amount (ZAR)</label><input class="form-input" id="donateAmount" type="number" placeholder="Enter amount in Rand" min="50"></div>
+        <div class="form-row"><label class="form-label">Your name or reference</label><input class="form-input" type="text" placeholder="e.g. Jane Smith"></div>
+        <button class="form-submit" onclick="confirmDonate()"><i class="fa-solid fa-lock"></i> &nbsp;Confirm Donation</button>
+    </div>
+</div>
+
+<!-- ══ USSD MODAL ══ -->
+<div class="ussd-modal-overlay" id="ussdModalOverlay" onclick="if(event.target===this)closeUSSDModal()">
+    <div class="ussd-modal-shell">
+        <button class="ussd-modal-close" onclick="closeUSSDModal()">✕</button>
+        <div class="phone-container">
+            <div class="phone-speaker"></div>
+            <div class="phone-screen">
+                <div class="ussd-status-bar"><span>GotG Net</span><span id="ussdClock">12:00</span></div>
+                <div class="dialer-screen" id="ussdDialerScreen">
+                    <div class="dialer-display" id="ussdDialerNumber"></div>
+                    <div class="dialer-grid">
+                        <button class="dial-btn" onclick="uPressKey('1')">1</button>
+                        <button class="dial-btn" onclick="uPressKey('2')">2</button>
+                        <button class="dial-btn" onclick="uPressKey('3')">3</button>
+                        <button class="dial-btn" onclick="uPressKey('4')">4</button>
+                        <button class="dial-btn" onclick="uPressKey('5')">5</button>
+                        <button class="dial-btn" onclick="uPressKey('6')">6</button>
+                        <button class="dial-btn" onclick="uPressKey('7')">7</button>
+                        <button class="dial-btn" onclick="uPressKey('8')">8</button>
+                        <button class="dial-btn" onclick="uPressKey('9')">9</button>
+                        <button class="dial-btn" onclick="uPressKey('*')">*</button>
+                        <button class="dial-btn" onclick="uPressKey('0')">0</button>
+                        <button class="dial-btn" onclick="uPressKey('#')">#</button>
+                        <button class="dial-btn call" onclick="uTriggerUSSD()">➔</button>
+                        <button class="dial-btn backspace" onclick="uBackspace()">⌫</button>
+                    </div>
+                </div>
+                <div class="ussd-dialog" id="ussdBox">
+                    <div class="ussd-content" id="ussdText">Loading...</div>
+                    <input type="text" id="ussdUserInput" class="ussd-input" autocomplete="off">
+                    <div class="ussd-actions">
+                        <button class="ussd-btn cancel" id="ussdCancelBtn" onclick="uExitUSSD()">Cancel</button>
+                        <button class="ussd-btn" id="ussdSendBtn" onclick="uProcessInput()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ussd-log-bar" id="ussdLogBox">> Ready. Dial *3664# to begin.</div>
+        <div class="ussd-reset-bar">
+            <button class="ussd-action-btn" onclick="uResetSession()">Reset</button>
+            <button class="ussd-action-btn" onclick="closeUSSDModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMsg">Done</span></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/js/gotg-user.js"></script>
+</body>
+</html>

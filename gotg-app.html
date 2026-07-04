@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift of the Givers — Crisis Command Centre</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/gotg-app.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-mark">
+                    <div class="brand-logo-wrap">
+                        <img src="logo.png" alt="Gift of the Givers" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class='fa-solid fa-hand-holding-heart logo-placeholder'></i>';">
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-name">Gift of the Givers</div>
+                        <div class="brand-tagline">Crisis Command</div>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search incidents, zones...">
+                </div>
+            </div>
+            <nav class="nav-section">
+                <div class="nav-group">
+                    <div class="nav-label">Operations</div>
+                    <div class="nav-item active" onclick="setNav(this)">
+                        <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+                    </div>
+                    <div class="nav-item" onclick="setNav(this)">
+                        <i class="fa-solid fa-triangle-exclamation"></i><span>Distress Alerts</span><span class="nav-badge">3</span>
+                    </div>
+                    <div class="nav-item" onclick="setNav(this)">
+                        <i class="fa-solid fa-truck-ramp-box"></i><span>Deployments</span>
+                    </div>
+                    <div class="nav-item" onclick="setNav(this)">
+                        <i class="fa-solid fa-warehouse"></i><span>Logistics</span>
+                    </div>
+                </div>
+                <div class="nav-group">
+                    <div class="nav-label">System</div>
+                    <div class="nav-item" onclick="setNav(this)">
+                        <i class="fa-solid fa-sliders"></i><span>Control Settings</span>
+                    </div>
+                    <div class="nav-item" onclick="setNav(this)">
+                        <i class="fa-solid fa-file-shield"></i><span>Audit Logs</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- FIELD BROADCAST PANEL -->
+            <div class="broadcast-panel">
+                <div class="broadcast-title">
+                    <i class="fa-solid fa-circle"></i>Broadcast to Field
+                </div>
+                <div class="broadcast-compose">
+                    <select class="broadcast-select" id="broadcastType">
+                        <option value="alert">⚠ Emergency Alert</option>
+                        <option value="shelter">🏠 New Shelter Open</option>
+                        <option value="aid">📦 Aid Drop-off Point</option>
+                        <option value="road">🚧 Road Status Update</option>
+                        <option value="water">💧 Water Available</option>
+                    </select>
+                    <textarea class="broadcast-input" id="broadcastMsg" rows="2" placeholder="Message to field users..."></textarea>
+                    <button class="broadcast-send" onclick="sendBroadcast()">
+                        <i class="fa-solid fa-paper-plane"></i> Send to All Field Users
+                    </button>
+                </div>
+                <div class="feed-log" id="feedLog"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="version-tag">v4.2.0-PRO</span>
+                <div class="status-dot"></div>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="workspace">
+            <header class="top-bar">
+                <div class="top-left">
+                    <h1 class="page-title">Global Crisis Control</h1>
+                    <div class="filter-tabs">
+                        <div class="filter-tab active">All</div>
+                        <div class="filter-tab">Air</div>
+                        <div class="filter-tab">Sea</div>
+                        <div class="filter-tab">Land</div>
+                        <div class="filter-tab">Disaster</div>
+                    </div>
+                </div>
+                <div class="top-right">
+                    <button class="top-btn alert"><i class="fa-regular fa-bell"></i></button>
+                    <button class="top-btn"><i class="fa-solid fa-gear"></i></button>
+                    <div class="user-pill">
+                        <div class="user-avatar">CC</div>
+                        <span class="user-name">Cmd. Centre</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-split">
+                <!-- Tracking Panel -->
+                <section class="tracking-panel">
+                    <div class="panel-header">
+                        <h2>Active Triggers</h2>
+                        <div class="live-pill" id="liveCounter">2 LIVE</div>
+                    </div>
+                    <div class="shipment-list" id="shipmentList"></div>
+                </section>
+
+                <!-- Map Area -->
+                <section class="map-area">
+                    <div id="map"></div>
+
+                    <!-- Replication Status Panel -->
+                    <div class="replication-panel" id="replPanel">
+                        <div class="repl-title"><i class="fa-solid fa-circle"></i>Replication Status</div>
+                        <div class="repl-row"><span class="repl-label">Node ID</span><span class="repl-value" id="replNodeId">CMD-01-AF</span></div>
+                        <div class="repl-row"><span class="repl-label">Vector State</span><span class="repl-value" id="replVector">[3,7,2,1,0]</span></div>
+                        <div class="repl-row"><span class="repl-label">Last Sync</span><span class="repl-value" id="replLastSync">14s ago</span></div>
+                        <div class="repl-row"><span class="repl-label">Mesh Peers</span><span class="repl-value" id="replPeers">7 active</span></div>
+                        <div class="repl-sync-bar"><div class="repl-sync-fill"></div></div>
+                    </div>
+
+                    <!-- Map Controls -->
+                    <div class="map-controls">
+                        <button class="map-control-btn" onclick="map.zoomIn()" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+                        <button class="map-control-btn" onclick="map.zoomOut()" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+                        <button class="map-control-btn" onclick="resetMapView()" title="Reset View"><i class="fa-solid fa-globe"></i></button>
+                        <button class="map-control-btn" onclick="toggleSatellite()" title="Toggle Layer"><i class="fa-solid fa-layer-group"></i></button>
+                    </div>
+
+                    <!-- Map Legend -->
+                    <div class="map-legend">
+                        <div class="legend-title">Legend</div>
+                        <div class="legend-item"><div class="legend-dot dot-red"></div> Critical Alert</div>
+                        <div class="legend-item"><div class="legend-dot dot-orange"></div> High Priority</div>
+                        <div class="legend-item"><div class="legend-dot dot-green"></div> Active Response</div>
+                        <div class="legend-item"><div class="legend-dot dot-blue"></div> Supply Hub</div>
+                    </div>
+
+                    <!-- Inspect Drawer -->
+                    <div class="inspect-drawer" id="inspectDrawer">
+                        <div class="drawer-header">
+                            <span class="drawer-id" id="insId">CRITICAL LEDGER</span>
+                            <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="drawer-body">
+                            <div class="drawer-title" id="insTitle">Loading...</div>
+                            <div class="drawer-subtitle">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span id="insReg">-</span>
+                            </div>
+                            <div class="drawer-grid">
+                                <div class="drawer-field">
+                                    <span class="field-label">Scenario</span>
+                                    <span class="field-value" id="insType">-</span>
+                                </div>
+                                <div class="drawer-field">
+                                    <span class="field-label">Priority</span>
+                                    <span class="field-value" id="insPriority">CRITICAL</span>
+                                </div>
+                                <div class="drawer-field">
+                                    <span class="field-label">Timestamp</span>
+                                    <span class="field-value" id="insTime">-</span>
+                                </div>
+                                <div class="drawer-field">
+                                    <span class="field-label">Status</span>
+                                    <span class="field-value" id="insStatus">UNRESOLVED</span>
+                                </div>
+                            </div>
+                            <div class="drawer-desc" id="insDesc">-</div>
+
+                            <!-- Asset Panel -->
+                            <div class="asset-panel" id="assetPanel">
+                                <div class="asset-header">
+                                    <div class="asset-icon"><i class="fa-solid fa-plane" id="assetIcon"></i></div>
+                                    <div class="asset-info">
+                                        <div class="asset-name" id="assetName">DHL / Boeing 777F</div>
+                                        <div class="asset-type" id="assetType">CARGO AIRCRAFT — FLIGHT GTI871</div>
+                                    </div>
+                                    <div class="asset-status in-transit" id="assetStatus">IN TRANSIT</div>
+                                </div>
+                                <div class="asset-metrics">
+                                    <div class="metric">
+                                        <span class="metric-label">ETA</span>
+                                        <span class="metric-value highlight" id="assetEta">18h 24m</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Fuel</span>
+                                        <span class="metric-value" id="assetFuel">74%</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Load</span>
+                                        <span class="metric-value" id="assetLoad">12.4T</span>
+                                    </div>
+                                </div>
+                                <div class="route-progress">
+                                    <div class="route-progress-label">
+                                        <span id="routeOrigin">AMS</span>
+                                        <span id="routeDest">LOS</span>
+                                    </div>
+                                    <div class="route-progress-bar">
+                                        <div class="route-progress-fill" id="routeProgressFill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Telemetry Panel -->
+                            <div class="telemetry-panel" id="telemetryPanel">
+                                <div class="telemetry-header">
+                                    <span class="telemetry-title">Cursor-on-Target Payload</span>
+                                    <span class="telemetry-format">CoT XML + TAK Protobuf</span>
+                                </div>
+                                <div class="telemetry-code" id="telemetryCode"></div>
+                            </div>
+
+                            <div class="drawer-actions">
+                                <button class="btn btn-secondary" onclick="closeDrawer()">Dismiss</button>
+                                <button class="btn btn-telemetry" id="telemetryBtn" onclick="toggleTelemetry()">
+                                    <i class="fa-solid fa-satellite-dish" style="margin-right:6px"></i>Inspect Telemetry
+                                </button>
+                                <button class="btn btn-push" onclick="pushToField()" id="pushBtn"><i class="fa-solid fa-satellite-dish" style="margin-right:6px"></i>Push to Field</button>
+                                <button class="btn btn-primary" onclick="dispatchResources()">
+                                    <i class="fa-solid fa-paper-plane" style="margin-right:6px"></i>Dispatch
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- TACTICAL ALERT MODAL -->
+    <div class="modal-overlay" id="tacticalModal">
+        <div class="tactical-card">
+            <div class="tactical-header">
+                <div class="tactical-tag">Critical Intercept Warning</div>
+                <h2 class="tactical-title">Distress Alert Received</h2>
+                <div class="tactical-divider"></div>
+            </div>
+            <div class="tactical-body">
+                <div class="tactical-row">
+                    <div class="tactical-label">Target Area</div>
+                    <div class="tactical-value" id="qLoc">-</div>
+                </div>
+                <div class="tactical-row">
+                    <div class="tactical-label">Crisis Model</div>
+                    <div class="tactical-value" id="qType">-</div>
+                </div>
+                <div class="tactical-row">
+                    <div class="tactical-label">Priority</div>
+                    <div class="tactical-value highlight" id="qPriority">CRITICAL IMPACT</div>
+                </div>
+                <div class="tactical-row">
+                    <div class="tactical-label">Requirements</div>
+                    <div class="tactical-value" id="qNeeds">-</div>
+                </div>
+            </div>
+            <div class="tactical-actions">
+                <button class="tactical-btn secondary" onclick="dismissAlert()">Ignore Log</button>
+                <button class="tactical-btn primary" onclick="acceptAlert()">View Distress</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="assets/js/gotg-data.js"></script>
+    <script src="assets/js/gotg-app.js"></script>
+</body>
+</html>

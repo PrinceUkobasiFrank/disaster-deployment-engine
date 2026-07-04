@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gift of the Givers — Disaster Deployment Engine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/gotg-splash.css">
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="screen">
+
+  <!-- WHEEL -->
+  <div class="wheel-wrapper">
+    <div class="wheel-ring" id="wheelRing">
+      <svg id="wheelSVG" viewBox="0 0 460 460" width="460" height="460"
+           xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;">
+        <defs id="wheelDefs"></defs>
+        <g id="wheelSlices"></g>
+        <!-- Outer ring border -->
+        <circle cx="230" cy="230" r="224" fill="none"
+                stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+        <!-- Inner gap ring (gap between slices and logo) -->
+        <circle cx="230" cy="230" r="74" fill="rgba(4,18,8,0.0)"
+                stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <!-- Spoke lines between slices -->
+        <g id="wheelSpokes" stroke="rgba(4,18,8,0.7)" stroke-width="2.5"></g>
+      </svg>
+    </div>
+
+    <!-- Center logo — sits above SVG, counter-rotates -->
+    <div class="center-ring"></div>
+    <div class="center-logo">
+      <img src="logo.png" alt="GotG Logo"
+           onerror="this.style.display='none';this.parentElement.style.background='#0a2a12';this.parentElement.innerHTML+='<svg viewBox='0 0 80 80' width='80' height='80' style='margin:25px auto;display:block'><path d='M40 10 C25 10 12 22 12 38 C12 50 20 60 32 64 L40 70 L48 64 C60 60 68 50 68 38 C68 22 55 10 40 10Z' fill='#10b981' opacity='0.7'/></svg>'">
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <div class="org-name">Gift of the Givers Foundation</div>
+    <div class="app-title">Disaster Deployment Engine</div>
+    <div class="app-subtitle">C4ISR · Civic Synthesis · Field Operations</div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="btn-group">
+    <a href="gotg-app.html" class="glass-btn primary">
+      <div class="btn-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="btn-text">
+        <span class="btn-label">User Interface</span>
+        <span class="btn-desc">Field volunteer · Donor · Beneficiary</span>
+      </div>
+    </a>
+
+    <a href="gotg-app.html" class="glass-btn secondary">
+      <div class="btn-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+      </div>
+      <div class="btn-text">
+        <span class="btn-label">Admin / Command Interface</span>
+        <span class="btn-desc">Incident command · GIS · NIMS</span>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer-bar">
+  <span class="footer-dot">●</span>
+  DDE v1.0 &nbsp;·&nbsp; Offline-First &nbsp;·&nbsp; Edge-Resilient
+  <span class="footer-dot">●</span>
+  <span class="footer-initiative">A PR3NC2 Initiative</span>
+</div>
+
+<script src="assets/js/gotg-splash.js"></script>
+</body>
+</html>
